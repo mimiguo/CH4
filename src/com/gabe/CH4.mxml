@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+	xmlns:mx="library://ns.adobe.com/flex/mx" minWidth="955"
+	minHeight="600" applicationComplete="init()">
+	<fx:Script>
+		<![CDATA[
+		import mx.utils.ObjectUtil;
+		private var test_so:SharedObject;
+		private var netConnection:NetConnection;
+		private var monthDay:Date;
+		private var good:Boolean;
+		
+		private function init() :void
+		{
+			trace('init');
+			var rtmp:String = 'rtmp://fms.2be.com.tw/basicSO';
+			netConnection = new NetConnection();
+			netConnection.addEventListener(NetStatusEvent.NET_STATUS, makeSO);
+			netConnection.connect(rtmp);
+			}
+
+			private function makeSO(e:NetStatusEvent) : void 
+			{
+				trace(e.info.code);
+				good = e.info.code == "NetConnection.Connect.Success";
+				
+				if (good) {
+					trace( netConnection.uri );
+					test_so = SharedObject.getRemote("test", netConnection.uri, false);
+					monthDay = new Date();
+					test_so.connect(netConnection);
+					test_so.addEventListener(SyncEvent.SYNC, seeSO);
+				}
+			}
+
+			private function seeSO(se:SyncEvent) : void 
+			{
+//				trace(ObjectUtil.toString(se));
+//				trace(se.changeList[0].code);
+				switch (se.changeList[0].code)
+				{
+					case 'clear':
+						loadSO();
+					break;
+					
+					case 'success':
+						showSO();
+					break;
+					
+				}
+			}
+
+			private function loadSO() : void 
+			{
+				test_so.setProperty('city','KS');
+				test_so.setProperty('dayOfMonth', monthDay.getDate());
+				test_so.setProperty('verity', true);
+				test_so.setProperty('bunch', 250);
+			}
+			
+			private function showSO() : void
+			{
+				trace(test_so.data.city);
+				
+				
+			}
+			
+		]]>
+	</fx:Script>
+</s:Application>
