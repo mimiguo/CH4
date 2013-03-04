@@ -36,6 +36,7 @@
 			addElement(container);
 			mark_txt.addEventListener(KeyboardEvent.KEY_UP, moveMark);
 			stage.focus = mark_txt;
+			txt_ti.addEventListener(FocusEvent.FOCUS_IN, cleanName);
 		}
 
 		private function makeSO(e:NetStatusEvent) : void 
@@ -121,15 +122,19 @@
 			msg_ta.appendText(msg+"\n");	
 		}
 			
-		private function sendWeb():void
+		private function send():void
 		{
-			web_so.setProperty("web", "http://"+ txt_ti.text);
+		}
+		
+		private function cleanName(e:FocusEvent):void
+		{
+			txt_ti.text = "";
 		}
 		]]>
 	</fx:Script>
 	<s:VGroup y="100">
 		<s:TextArea id="msg_ta" ></s:TextArea>
-		<s:TextInput id="txt_ti"></s:TextInput>
-		<s:Button label="open web page" click="sendWeb()"></s:Button>
+		<s:TextInput id="txt_ti">test</s:TextInput>
+		<s:Button label="open web page" click="send()"></s:Button>
 	</s:VGroup>
 </s:Application>
