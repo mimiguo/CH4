@@ -15,16 +15,20 @@
 		private function init() :void
 		{
 			trace('init');
+			
 			var rtmp:String = 'rtmp://fms.2be.com.tw/basicSO';
 			netConnection = new NetConnection();
 			netConnection.addEventListener(NetStatusEvent.NET_STATUS, makeSO);
 			netConnection.connect(rtmp);
 			mark_txt = new TextField();
 			mark_txt.text = 'im here';
+			mark_txt.x = 10;
+			mark_txt.y = 10;
 			var container:UIComponent = new UIComponent();
 			container.addChild(mark_txt);
 			addElement(container);
 			mark_txt.addEventListener(KeyboardEvent.KEY_UP, moveMark);
+			stage.focus = mark_txt;
 		}
 
 		private function makeSO(e:NetStatusEvent) : void 
@@ -43,17 +47,21 @@
 
 		private function seeSO(se:SyncEvent) : void 
 		{
-//				trace(ObjectUtil.toString(se));
-//				trace(se.changeList[0].code);
-			switch (se.changeList[0].code)
+			for (var cl:uint; cl < se.changeList.length; cl++)
 			{
-				case 'clear':
-					loadSO();
-				break;
-				
-				case 'success':
-					showSO();
-				break;
+				if (se.changeList[cl].code == "change") {
+					switch(se.changeList[cl].name)
+					{
+						case 'xpos':
+							mark_txt.x = test_so.data.xpos;					
+							break;
+						case 'ypos':
+							mark_txt.y = test_so.data.ypos;					
+							break;
+						default:
+							break;
+					}	
+				}
 			}
 		}
 
@@ -68,20 +76,28 @@
 		private function showSO() : void
 		{
 			trace(test_so.data.city);
-			
-			
 		}
 
 		private function moveMark(e:KeyboardEvent) : void 
 		{
-			trace(e.keyCode);
 			switch (e.keyCode)
 			{
 				case Keyboard.LEFT:
+					mark_txt.x -= 5;
 				break;
 				case Keyboard.RIGHT:
+					mark_txt.x += 5;
 				break;
+				case Keyboard.UP:
+					mark_txt.y -= 5;
+					break;
+				case Keyboard.DOWN:
+					mark_txt.y += 5;
+					break;
 			}
+			
+			test_so.setProperty('xpos', mark_txt.x);
+			test_so.setProperty('ypos', mark_txt.y);
 		}
 			
 		]]>
