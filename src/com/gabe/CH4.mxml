@@ -4,9 +4,15 @@
 	minHeight="600" applicationComplete="init()">
 	<fx:Script>
 		<![CDATA[
-		import mx.core.UIComponent;
-		import mx.utils.ObjectUtil;
+			import flash.net.navigateToURL;
+			
+			import flashx.textLayout.elements.BreakElement;
+			
+			import mx.core.UIComponent;
+			import mx.utils.ObjectUtil;
+			
 		private var test_so:SharedObject;
+		private var web_so:SharedObject;
 		private var netConnection:NetConnection;
 		private var monthDay:Date;
 		private var good:Boolean;
@@ -15,15 +21,16 @@
 		private function init() :void
 		{
 			trace('init');
-			
 			var rtmp:String = 'rtmp://fms.2be.com.tw/basicSO';
 			netConnection = new NetConnection();
 			netConnection.addEventListener(NetStatusEvent.NET_STATUS, makeSO);
 			netConnection.connect(rtmp);
-			mark_txt = new TextField();
-			mark_txt.text = 'im here';
-			mark_txt.x = 10;
-			mark_txt.y = 10;
+			
+			mark_txt 		= new TextField();
+			mark_txt.text 	= 'im here';
+			mark_txt.x 		= 10;
+			mark_txt.y 		= 10;
+			
 			var container:UIComponent = new UIComponent();
 			container.addChild(mark_txt);
 			addElement(container);
@@ -38,10 +45,13 @@
 			
 			if (good) {
 				trace( netConnection.uri );
-				test_so = SharedObject.getRemote("test", netConnection.uri, false);
-				monthDay = new Date();
+				test_so 	= SharedObject.getRemote("test", netConnection.uri, false);
+				web_so 		= SharedObject.getRemote("web", netConnection.uri, false);
+				monthDay 	= new Date();
 				test_so.connect(netConnection);
 				test_so.addEventListener(SyncEvent.SYNC, seeSO);
+				web_so.connect(netConnection);
+				web_so.addEventListener(SyncEvent.SYNC, seeSO);
 			}
 		}
 
@@ -49,6 +59,8 @@
 		{
 			for (var cl:uint; cl < se.changeList.length; cl++)
 			{
+//				trace(se.changeList[cl].code);
+				pushMsg(cl + ":" + se.changeList[cl].code);
 				if (se.changeList[cl].code == "change") {
 					switch(se.changeList[cl].name)
 					{
@@ -57,6 +69,10 @@
 							break;
 						case 'ypos':
 							mark_txt.y = test_so.data.ypos;					
+							break;
+						case 'web':
+							var webRequest:URLRequest = new URLRequest(web_so.data.web);
+							navigateToURL(webRequest, "_blank");
 							break;
 						default:
 							break;
@@ -100,6 +116,20 @@
 			test_so.setProperty('ypos', mark_txt.y);
 		}
 			
+		private function pushMsg(msg:String):void
+		{
+			msg_ta.appendText(msg+"\n");	
+		}
+			
+		private function sendWeb():void
+		{
+			web_so.setProperty("web", "http://"+ txt_ti.text);
+		}
 		]]>
 	</fx:Script>
+	<s:VGroup y="100">
+		<s:TextArea id="msg_ta" ></s:TextArea>
+		<s:TextInput id="txt_ti"></s:TextInput>
+		<s:Button label="open web page" click="sendWeb()"></s:Button>
+	</s:VGroup>
 </s:Application>
